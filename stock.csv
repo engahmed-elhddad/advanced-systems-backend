@@ -1,0 +1,100 @@
+﻿part_number,price,availability,Brand,Description,qty,category
+6GK7443-1EX11-0XE0,,In Stock,siemens, CP 443-1 ,1,plc
+6GK7443-1EX20-0XE0,,In Stock,siemens,CP 443-1,1,plc
+6GK7343-1EX11-0XE0,,In Stock,siemens,,1,plc
+6ES7441-2AA04-0AE0,,In Stock,siemens,,1,plc
+317-2AJ10-0AB0,,In Stock,siemens,,1,plc
+315-2AH14-0AB0,,In Stock,siemens,,1,plc
+315-2AG10-0AB0,,In Stock,siemens,,1,plc
+315-2AF03-0AB0,,In Stock,siemens,,1,plc
+315-1AF03-0AB0,,In Stock,siemens,,1,plc
+314-5AE10-0AB0,,In Stock,siemens,,1,plc
+313-1AD03-0AB0,,In Stock,siemens,,1,plc
+313-6CF03-0AB0,,In Stock,siemens,,1,plc
+312-5BD01-0AB0,,In Stock,siemens,,1,plc
+6ES5095-8MA03 ,,In Stock,siemens,,1,plc
+6ES5095-8MA05,,In Stock,siemens,,1,plc
+6ES5095-8MC01,,In Stock,siemens,,1,plc
+6ES7510-1DJ01-0AB0,,In Stock,siemens,,1,plc
+412-5HK06-0AB0,,In Stock,siemens,,1,plc
+416-2XK04-0AB0,,In Stock,siemens,,1,plc
+357-4AH01-0AE0,,In Stock,siemens,MULTI-AXIS MODULE,1,plc
+6ES7350-1AH03-0AE0,32000,In Stock,siemens,FM350-1 Counter Module ,1,plc
+6AV2124-2DC01-0AX0,,In Stock,siemens,KTP400,1,HMI
+6AV2124-0GC01-0AX0,40000,In Stock,siemens,TP700 COMFORT/,1,HMI
+"6AV2123-2GB03-0AX0
+",20000,In Stock,siemens,KTP700 ,1,HMI
+6AV6647-0AD11-3AX0,20000,In Stock,siemens,KTP600 Basic Color PN ,1,HMI
+6AV3607-1JC20-0AX1,,In Stock,siemens,,1,HMI
+6AV6641-0CA01-0AX0,35000,In Stock,siemens,OP77B ,1,HMI
+151-1CA00-0AB0,,In Stock,siemens,,1,plc
+151-1AA04-0AB0,,In Stock,siemens,,1,plc
+153-1AA03-0XB0,,In Stock,siemens,INTERFACE MODULE,1,plc
+360-3AA01-0AA0,,In Stock,siemens,INTERFACE MODULE,1,plc
+361-3CA01-0AA0,,In Stock,siemens,INTERFACE MODULE,1,plc
+952-1AK00-0AA0,,In Stock,siemens,Memory Card for S7-400 1Mbyte,1,MC
+951-0KF00-0AA0,,In Stock,siemens,Memory Card for S7-300 64Kbyte,1,MC
+953-8LF30-0AA0,,In Stock,siemens,Memory Card for S7-300 64 KBYTES,1,MC
+953-8LG11-0AA0,,In Stock,siemens,Memory Card for S7-300 128 KBYTES,1,MC
+953-8LJ11-0AA0,,In Stock,siemens,Memory Card for S7-300 512 KBYTES,1,MC
+412-5HK06-0AB0,,In Stock,siemens,,1,Power Supply
+407-0KR02-0AA0,,In Stock,siemens,,1,Power Supply
+405-0KA02-0AA0,,In Stock,siemens,,1,Power Supply
+6EP1 334-2AA01,,In Stock,siemens,24V/10A  ,1,Power Supply
+6EP1 334-2BA01,,In Stock,siemens,24V/10A,1,Power Supply
+6EP1 333-2BA00,,In Stock,siemens,24V/5A,1,Power Supply
+6EP1 332-2BA00,,In Stock,siemens,24V/3.8A,1,Power Supply
+6EP1 436-3BA00,,In Stock,siemens,380V/24V/20A,1,Power Supply
+6EP0-133-3AA00-0AA1,,In Stock,siemens,,1,Power Supply
+6EP1436-2BA00,,In Stock,siemens,,1,Power Supply
+6EP1437-2BA00,,In Stock,siemens,,1,Power Supply
+3TK2824-1BB40 ,,In Stock,siemens,,1,SAFETY RELAY
+3TK2824-1CB30,,In Stock,siemens,,1,SAFETY RELAY
+7ML5221-1CA11,50000,In Stock,siemens,Ultrasonic level transmitter 12M,1,SENSOR
+331-7NF00-0AB0,,In Stock,siemens, 8 AI;,1,plc
+331-7PF01-0AB0,,In Stock,siemens, 8 AI;,1,plc
+321-1BL00-0AA0,,In Stock,siemens,,1,plc
+322-1BL00-0AA0,,In Stock,siemens,,1,plc
+400-1PB00-0AA0,,In Stock,siemens,Profibus Module,1,VFD
+6SL3040-0MA00-0AA1,,In Stock,siemens,CU320,1,VFD
+6SL3244-0BB00-1BA1,,In Stock,siemens,CU240B-2,1,VFD
+6SE6440-2UD38-8FA1,,In Stock,siemens,MM440 90/110KW,1,VFD
+420-2UD17-5AA1,,In Stock,siemens,MM420/220V/0.75kw,1,VFD
+6SL3224-0BE25-5AAO,50000,In Stock,siemens,PM240 5.5/7.5kw ,1,VFD
+6SL3210-1PE21-8AL0,35000,In Stock,siemens,PM240-2 5.5/7.5kw ,1,VFD
+6SL3210-1PE14-3AL1,15000,In Stock,siemens, PM240-2 1.1/1.5kw ,1,VFD
+6SL3210-1KE18-8UB1,20000,In Stock,siemens,G120C USS/MB 4KW ,1,VFD
+6SL3210-1KE18-8AP0,30000,In Stock,siemens,G120C DP 4KW ,1,VFD
+6SL3224-0BE25-5AAO,,In Stock,siemens,MM440 4KW,1,VFD
+6SL3210-1PE21-8AL1,,In Stock,siemens,MM440 55/75KW,1,VFD
+131-7RF00-0AB0,,In Stock,siemens,8 DI ET200iSP,1,plc
+138-7FN00-0AB0,,In Stock,siemens,8 F-DI fail-safe ET200iSP,1,plc
+131-4BB01-0AB0,,In Stock,siemens, 2 DI High Feature,1,plc
+131-4BF00-0AA0,,In Stock,siemens, 8DI ET 200S,1,plc
+132-4BF00-0AA0,,In Stock,siemens,8DO ET 200S,1,plc
+135-4FB01-0AB0,,In Stock,siemens,"ET200S, 2 AO",1,plc
+138-4DA04-0AB0,,In Stock,siemens,"ET 200S, 1 count",1,plc
+SKP75.001E2,35000,In Stock,siemens,,1,
+151-1CA00-3BL0,,In Stock,siemens,,1,plc
+6ES5 308-3UA12,,In Stock,siemens,,1,plc
+3UF5011-3AN00-1,,In Stock,siemens,,1,
+3UF5021-3AN00-1,,In Stock,siemens,,1,
+231-7PB22-0XA0,,In Stock,siemens,,1,plc
+6ES7193-4CA20-0AA0,,In Stock,siemens,,1,plc
+6ES5-944-7UB11,,In Stock,siemens,,1,plc
+414-3XJ00-0ABO,,In Stock,siemens,Siemens,1,plc
+VTF18-4P1640,,In Stock,sick,,1,sensors
+VL18-3P3640,,In Stock,sick,,1,sensors
+E3F2-7DB4/E3F2-7L,,In Stock,omron,,1,sensors
+xub2apanm12r,1400,In Stock,telemeqanique,,1,sensors
+KG5040,,In Stock,ifm,,1,sensors
+KG5017,,In Stock,ifm,,1,sensors
+XS612B1PAM12,2500,In Stock,telemeqanique,,1,sensors
+XS618B1PAM12,2500,In Stock,telemeqanique,,1,sensors
+XS612B1PBL2 ,"2,377.99 ",In Stock,telemeqanique,,1,sensors
+XS630B1MAL2 ,4102.62,In Stock,telemeqanique,,1,sensors
+XS618B1PBL2 ,2720.95,In Stock,telemeqanique,,1,sensors
+XCKM110 ,1855.46,In Stock,telemeqanique,,1,sensors
+XCKJ167 ,2993.64,In Stock,telemeqanique,,1,sensors
+XCKM115 ,2114.81,In Stock,telemeqanique,,1,sensors
+XS8C4A1PCG13 ,4060.68,In Stock,telemeqanique,,1,sensors

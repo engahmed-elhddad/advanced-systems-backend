@@ -1,0 +1,136 @@
+2026-03-02 00:25:23,091 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:25:23,096 | INFO | Triggering Nexar fallback
+2026-03-02 00:25:23,096 | ERROR | Search error | Query: 315 | Error: 'coroutine' object is not iterable
+2026-03-02 00:25:25,205 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:25:25,206 | INFO | Triggering Nexar fallback
+2026-03-02 00:25:25,207 | ERROR | Search error | Query: 315 | Error: 'coroutine' object is not iterable
+2026-03-02 00:25:28,207 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:25:28,209 | INFO | Triggering Nexar fallback
+2026-03-02 00:25:28,209 | ERROR | Search error | Query: 315 | Error: 'coroutine' object is not iterable
+2026-03-02 00:25:31,353 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:25:31,355 | INFO | Triggering Nexar fallback
+2026-03-02 00:25:31,356 | ERROR | Search error | Query: 315 | Error: 'coroutine' object is not iterable
+2026-03-02 00:30:59,593 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:30:59,597 | INFO | Triggering Nexar fallback
+2026-03-02 00:30:59,597 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0043s
+2026-03-02 00:31:02,013 | INFO | Search started | Query: 315 | Page: 2
+2026-03-02 00:31:02,014 | INFO | Triggering Nexar fallback
+2026-03-02 00:31:02,015 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 2 | Time: 0.002s
+2026-03-02 00:31:02,454 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:31:02,455 | INFO | Cache hit
+2026-03-02 00:31:03,267 | INFO | Search started | Query: 315 | Page: 1
+2026-03-02 00:31:03,267 | INFO | Cache hit
+2026-03-02 00:31:11,614 | INFO | Search started | Query: 315-2AH14 | Page: 1
+2026-03-02 00:31:11,615 | INFO | Triggering Nexar fallback
+2026-03-02 00:31:11,616 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.0021s
+2026-03-02 00:31:22,408 | INFO | Search started | Query: 315-2AH14 | Page: 1
+2026-03-02 00:31:22,409 | INFO | Cache hit
+2026-03-02 00:35:00,456 | INFO | Search started | Query: 315-2ah14 | Page: 1
+2026-03-02 00:35:00,456 | ERROR | Search error | Query: 315-2ah14 | Error: name 'SessionLocal' is not defined
+2026-03-02 00:40:01,665 | INFO | Search started | Query: 315-2AH14 | Page: 1
+2026-03-02 00:40:01,666 | ERROR | Search error | Query: 315-2AH14 | Error: name 'SessionLocal' is not defined
+2026-03-02 00:46:58,113 | INFO | Search started | Query: 315-2ah14 | Page: 1
+2026-03-02 00:46:58,118 | INFO | Triggering Nexar fallback
+2026-03-02 00:46:58,118 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.0054s
+2026-03-02 21:59:53,208 | INFO | Search started | Query: undefined | Page: 1
+2026-03-02 21:59:53,214 | INFO | Triggering Nexar fallback
+2026-03-02 21:59:53,214 | INFO | Search completed | Source: Nexar | Total: 1 | Page: 1 | Time: 0.006s
+2026-03-02 21:59:53,918 | INFO | Search started | Query: undefined | Page: 1
+2026-03-02 21:59:53,918 | INFO | Cache hit
+2026-03-02 22:05:01,744 | INFO | Search started | Query: 315-2AH14-0AB0 | Page: 1
+2026-03-02 22:05:01,751 | INFO | Triggering Nexar fallback
+2026-03-02 22:05:01,751 | INFO | Search completed | Source: Local + Nexar | Total: 1 | Page: 1 | Time: 0.0073s
+2026-03-02 22:05:02,001 | INFO | Search started | Query: 315-2AH14-0AB0 | Page: 1
+2026-03-02 22:05:02,002 | INFO | Cache hit
+2026-03-03 01:23:06,061 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:23:06,064 | INFO | Triggering Nexar fallback
+2026-03-03 01:23:06,065 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0047s
+2026-03-03 01:23:06,205 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:23:06,206 | INFO | Cache hit
+2026-03-03 01:25:58,366 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:25:58,367 | INFO | Triggering Nexar fallback
+2026-03-03 01:25:58,368 | INFO | Search completed | Source: Local + Nexar | Total: 16 | Page: 1 | Time: 0.0021s
+2026-03-03 01:25:59,466 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:25:59,466 | INFO | Cache hit
+2026-03-03 01:26:02,191 | INFO | Search started | Query: 315- | Page: 1
+2026-03-03 01:26:02,192 | INFO | Triggering Nexar fallback
+2026-03-03 01:26:02,192 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0011s
+2026-03-03 01:26:03,014 | INFO | Search started | Query: 315-2 | Page: 1
+2026-03-03 01:26:03,016 | INFO | Triggering Nexar fallback
+2026-03-03 01:26:03,016 | INFO | Search completed | Source: Local + Nexar | Total: 4 | Page: 1 | Time: 0.0013s
+2026-03-03 01:26:04,296 | INFO | Search started | Query: 315-2a | Page: 1
+2026-03-03 01:26:04,297 | INFO | Triggering Nexar fallback
+2026-03-03 01:26:04,297 | INFO | Search completed | Source: Local + Nexar | Total: 4 | Page: 1 | Time: 0.0011s
+2026-03-03 01:26:06,448 | INFO | Search started | Query: 315-2 | Page: 1
+2026-03-03 01:26:06,449 | INFO | Cache hit
+2026-03-03 01:26:07,145 | INFO | Search started | Query: 315-2A | Page: 1
+2026-03-03 01:26:07,146 | INFO | Triggering Nexar fallback
+2026-03-03 01:26:07,146 | INFO | Search completed | Source: Local + Nexar | Total: 4 | Page: 1 | Time: 0.0011s
+2026-03-03 01:26:08,280 | INFO | Search started | Query: 315-2AH | Page: 1
+2026-03-03 01:26:08,281 | INFO | Triggering Nexar fallback
+2026-03-03 01:26:08,281 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.0011s
+2026-03-03 01:28:56,403 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:28:56,403 | INFO | Cache hit
+2026-03-03 01:28:58,874 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:28:58,876 | INFO | Triggering Nexar fallback
+2026-03-03 01:28:58,876 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0026s
+2026-03-03 01:31:40,684 | INFO | Search started | Query: 315-2AH14 | Page: 1
+2026-03-03 01:31:40,685 | INFO | Triggering Nexar fallback
+2026-03-03 01:31:40,685 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.001s
+2026-03-03 01:31:47,737 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:31:47,739 | INFO | Cache hit
+2026-03-03 01:35:27,016 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:35:27,017 | INFO | Triggering Nexar fallback
+2026-03-03 01:35:27,019 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0022s
+2026-03-03 01:35:40,758 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:35:40,759 | INFO | Triggering Nexar fallback
+2026-03-03 01:35:40,759 | INFO | Search completed | Source: Local + Nexar | Total: 16 | Page: 1 | Time: 0.001s
+2026-03-03 01:36:33,763 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:36:33,767 | INFO | Triggering Nexar fallback
+2026-03-03 01:36:33,767 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0041s
+2026-03-03 01:37:00,956 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:37:00,960 | INFO | Triggering Nexar fallback
+2026-03-03 01:37:00,960 | INFO | Search completed | Source: Local + Nexar | Total: 16 | Page: 1 | Time: 0.004s
+2026-03-03 01:37:01,135 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:37:01,135 | INFO | Cache hit
+2026-03-03 01:39:52,343 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:39:52,346 | INFO | Triggering Nexar fallback
+2026-03-03 01:39:52,347 | INFO | Search completed | Source: Local + Nexar | Total: 16 | Page: 1 | Time: 0.0042s
+2026-03-03 01:39:52,657 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:39:52,658 | INFO | Triggering Nexar fallback
+2026-03-03 01:39:52,659 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0026s
+2026-03-03 01:40:01,287 | INFO | Search started | Query: 314 | Page: 1
+2026-03-03 01:40:01,288 | INFO | Triggering Nexar fallback
+2026-03-03 01:40:01,290 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.0022s
+2026-03-03 01:40:05,055 | INFO | Search started | Query: 231 | Page: 1
+2026-03-03 01:40:05,057 | INFO | Triggering Nexar fallback
+2026-03-03 01:40:05,057 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.002s
+2026-03-03 01:40:14,992 | INFO | Search started | Query: 54 | Page: 1
+2026-03-03 01:40:14,993 | INFO | Triggering Nexar fallback
+2026-03-03 01:40:14,994 | INFO | Search completed | Source: Nexar | Total: 1 | Page: 1 | Time: 0.001s
+2026-03-03 01:44:19,149 | INFO | Search started | Query: 315 | Page: 1
+2026-03-03 01:44:19,154 | INFO | Triggering Nexar fallback
+2026-03-03 01:44:19,154 | INFO | Search completed | Source: Local + Nexar | Total: 5 | Page: 1 | Time: 0.0045s
+2026-03-03 01:44:28,639 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:44:28,640 | INFO | Triggering Nexar fallback
+2026-03-03 01:44:28,641 | INFO | Search completed | Source: Local + Nexar | Total: 16 | Page: 1 | Time: 0.002s
+2026-03-03 01:44:29,881 | INFO | Search started | Query: 314 | Page: 1
+2026-03-03 01:44:29,883 | INFO | Triggering Nexar fallback
+2026-03-03 01:44:29,883 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.0021s
+2026-03-03 01:44:31,509 | INFO | Search started | Query: 31 | Page: 1
+2026-03-03 01:44:31,509 | INFO | Cache hit
+2026-03-03 01:44:33,918 | INFO | Search started | Query: 23 | Page: 1
+2026-03-03 01:44:33,919 | INFO | Triggering Nexar fallback
+2026-03-03 01:44:33,919 | INFO | Search completed | Source: Local + Nexar | Total: 3 | Page: 1 | Time: 0.0021s
+2026-03-03 01:44:34,286 | INFO | Search started | Query: 231 | Page: 1
+2026-03-03 01:44:34,287 | INFO | Triggering Nexar fallback
+2026-03-03 01:44:34,287 | INFO | Search completed | Source: Local + Nexar | Total: 2 | Page: 1 | Time: 0.0013s
+2026-03-03 01:44:36,988 | INFO | Search started | Query: 23 | Page: 1
+2026-03-03 01:44:36,988 | INFO | Cache hit
+2026-03-03 01:44:40,082 | INFO | Search started | Query: 52 | Page: 1
+2026-03-03 01:44:40,083 | INFO | Triggering Nexar fallback
+2026-03-03 01:44:40,084 | INFO | Search completed | Source: Local + Nexar | Total: 3 | Page: 1 | Time: 0.0023s
+2026-03-03 01:45:16,545 | INFO | Search started | Query: 52 | Page: 1
+2026-03-03 01:45:16,545 | INFO | Cache hit
+2026-03-03 01:45:56,849 | INFO | Search started | Query: 52 | Page: 1
+2026-03-03 01:45:56,849 | INFO | Cache hit
