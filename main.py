@@ -4,7 +4,8 @@ import os
 from dotenv import load_dotenv
 
 from database import engine
-from models import Base
+from models import Base, Product
+from database import SessionLocal
 from search_engine import search_part as engine_search
 from services.local_service import search_local
 from services.nexar_service import search_nexar
@@ -145,10 +146,22 @@ def admin_nexar_search(part: str, x_api_key: str = Header(None)):
 @app.get("/")
 def home():
     return {"message": "Advanced Systems Backend Running 🚀"}
+
+
+# =========================
+# All Products (For Sitemap)
+# =========================
 @app.get("/all-products")
 def all_products():
 
-    results = search_local("")
+    db = SessionLocal()
+
+    products = db.query(Product).all()
+
+    results = [
+        {"part_number": p.part_number}
+        for p in products
+    ]
 
     return {
         "count": len(results),
