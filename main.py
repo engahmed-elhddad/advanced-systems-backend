@@ -1,19 +1,17 @@
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 
-from database import engine
+from database import engine, SessionLocal
 from models import Base, Product
-from database import SessionLocal
 from search_engine import search_part as engine_search
 from services.local_service import search_local
 from services.nexar_service import search_nexar
 from services.part_intelligence import detect_part_info
 from services.datasheet_service import get_datasheet
 from services.supplier_service import get_suppliers
-
- 
 
 
 # =========================
@@ -52,26 +50,48 @@ Base.metadata.create_all(bind=engine)
 
 
 # =========================
-# 🔥 PART INTELLIGENCE
+# Models for API
 # =========================
+class ProductCreate(BaseModel):
+    part_number: str
+    manufacturer: str | None = None
+    condition: str | None = "Used"
+    availability: str | None = "In Stock"
+    price: float | None = 0
+    quantity: int | None = 0
+
+
+class RFQRequest(BaseModel):
+    part_number: str
+    quantity: int
+    company: str
+    email: str
+
 
 # =========================
-# 🔥 DATASHEET ENGINE
+# Add Product (Stock Manager)
 # =========================
-def guess_datasheet(part, manufacturer):
+@app.post("/add-product")
+def add_product(product: ProductCreate):
 
-    part = part.upper()
+    db = SessionLocal()
 
-    if manufacturer == "Siemens":
-        return f"https://www.google.com/search?q={part}+siemens+datasheet+pdf"
+    try:
+        new_product = Product(
+            part_number=product.part_number,
+            price=product.price,
+            availability=product.availability,
+            condition=product.condition,
+            quantity=product.quantity
+        )
 
-    if manufacturer == "Pepperl+Fuchs":
-        return f"https://www.google.com/search?q={part}+pepperl+fuchs+datasheet+pdf"
+        db.add(new_product)
+        db.commit()
 
-    if manufacturer == "Mitsubishi":
-        return f"https://www.google.com/search?q={part}+mitsubishi+datasheet+pdf"
+        return {"status": "Product Added"}
 
-    return f"https://www.google.com/search?q={part}+datasheet+pdf"
+    finally:
+        db.close()
 
 
 # =========================
@@ -91,7 +111,9 @@ def get_product(part_number: str):
     intelligence = detect_part_info(part_number)
     datasheet = get_datasheet(part_number)
     suppliers = get_suppliers(part_number)
+
     results = search_local(part_number)
+
     if results:
         product = results[0]
 
@@ -101,10 +123,11 @@ def get_product(part_number: str):
             "category": intelligence["category"],
             "description": intelligence["description"],
             "datasheet": datasheet,
-            "suppliers":suppliers,
+            "suppliers": suppliers,
             "price": product["price"],
             "availability": product["availability"],
             "condition": product.get("condition") or "Used",
+            "quantity": product.get("quantity", 0),
             "rfq_available": False
         }
 
@@ -114,11 +137,27 @@ def get_product(part_number: str):
         "category": intelligence["category"],
         "description": intelligence["description"],
         "datasheet": datasheet,
-        "suppliers":suppliers,
+        "suppliers": suppliers,
         "price": None,
         "availability": "Not in Stock",
         "condition": None,
+        "quantity": 0,
         "rfq_available": True
+    }
+
+
+# =========================
+# RFQ Endpoint
+# =========================
+@app.post("/rfq")
+def create_rfq(rfq: RFQRequest):
+
+    return {
+        "status": "RFQ received",
+        "part_number": rfq.part_number,
+        "quantity": rfq.quantity,
+        "company": rfq.company,
+        "email": rfq.email
     }
 
 
@@ -141,14 +180,6 @@ def admin_nexar_search(part: str, x_api_key: str = Header(None)):
 
 
 # =========================
-# Health Check
-# =========================
-@app.get("/")
-def home():
-    return {"message": "Advanced Systems Backend Running 🚀"}
-
-
-# =========================
 # All Products (For Sitemap)
 # =========================
 @app.get("/all-products")
@@ -156,14 +187,26 @@ def all_products():
 
     db = SessionLocal()
 
-    products = db.query(Product).all()
+    try:
+        products = db.query(Product).all()
 
-    results = [
-        {"part_number": p.part_number}
-        for p in products
-    ]
+        results = [
+            {"part_number": p.part_number}
+            for p in products
+        ]
 
-    return {
-        "count": len(results),
-        "results": results
-    }
+        return {
+            "count": len(results),
+            "results": results
+        }
+
+    finally:
+        db.close()
+
+
+# =========================
+# Health Check
+# =========================
+@app.get("/")
+def home():
+    return {"message": "Advanced Systems Backend Running 🚀"}
