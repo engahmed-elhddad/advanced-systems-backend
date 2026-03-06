@@ -145,3 +145,12 @@ def admin_nexar_search(part: str, x_api_key: str = Header(None)):
 @app.get("/")
 def home():
     return {"message": "Advanced Systems Backend Running 🚀"}
+@app.get("/all-products")
+def all_products():
+
+    results = search_local("")
+
+    return {
+        "count": len(results),
+        "results": results
+    }
