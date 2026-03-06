@@ -10,6 +10,8 @@ from services.local_service import search_local
 from services.nexar_service import search_nexar
 from services.part_intelligence import detect_part_info
 from services.datasheet_service import get_datasheet
+from services.supplier_service import get_suppliers
+
  
 
 
@@ -87,6 +89,7 @@ def get_product(part_number: str):
 
     intelligence = detect_part_info(part_number)
     datasheet = get_datasheet(part_number)
+    suppliers = get_suppliers(part_number)
     results = search_local(part_number)
     if results:
         product = results[0]
@@ -97,6 +100,7 @@ def get_product(part_number: str):
             "category": intelligence["category"],
             "description": intelligence["description"],
             "datasheet": datasheet,
+            "suppliers":suppliers,
             "price": product["price"],
             "availability": product["availability"],
             "condition": product.get("condition") or "Used",
@@ -109,6 +113,7 @@ def get_product(part_number: str):
         "category": intelligence["category"],
         "description": intelligence["description"],
         "datasheet": datasheet,
+        "suppliers":suppliers,
         "price": None,
         "availability": "Not in Stock",
         "condition": None,
