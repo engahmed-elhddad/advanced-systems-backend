@@ -88,12 +88,7 @@ def get_product(part_number: str):
     intelligence = detect_part_info(part_number)
     datasheet = get_datasheet(part_number)
 
-    datasheet = guess_datasheet(
-        part_number,
-        intelligence["manufacturer"]
-    )
-
-    results = search_local(part_number)
+     results = search_local(part_number)
 
     if results:
         product = results[0]
