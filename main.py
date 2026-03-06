@@ -8,6 +8,9 @@ from models import Base
 from search_engine import search_part as engine_search
 from services.local_service import search_local
 from services.nexar_service import search_nexar
+from services.part_intelligence import detect_part_info
+from services.datasheet_service import get_datasheet
+ 
 
 
 # =========================
@@ -48,44 +51,6 @@ Base.metadata.create_all(bind=engine)
 # =========================
 # 🔥 PART INTELLIGENCE
 # =========================
-def detect_part_info(part):
-
-    part = part.upper()
-
-    if part.startswith("6ES7"):
-        return {
-            "manufacturer": "Siemens",
-            "category": "PLC Module",
-            "description": "Siemens SIMATIC S7 industrial PLC module"
-        }
-
-    if part.startswith("3RT"):
-        return {
-            "manufacturer": "Siemens",
-            "category": "Contactor",
-            "description": "Siemens industrial contactor"
-        }
-
-    if part.startswith("NBB"):
-        return {
-            "manufacturer": "Pepperl+Fuchs",
-            "category": "Proximity Sensor",
-            "description": "Industrial inductive proximity sensor"
-        }
-
-    if part.startswith("FX"):
-        return {
-            "manufacturer": "Mitsubishi",
-            "category": "PLC",
-            "description": "Mitsubishi industrial PLC controller"
-        }
-
-    return {
-        "manufacturer": None,
-        "category": "Industrial Automation Component",
-        "description": "Industrial automation spare part"
-    }
-
 
 # =========================
 # 🔥 DATASHEET ENGINE
@@ -121,6 +86,7 @@ def search(part: str, page: int = 1, limit: int = 20):
 def get_product(part_number: str):
 
     intelligence = detect_part_info(part_number)
+    datasheet = get_datasheet(part_number)
 
     datasheet = guess_datasheet(
         part_number,
