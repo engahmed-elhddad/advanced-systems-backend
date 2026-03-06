@@ -10,13 +10,71 @@ def normalize_part(part: str) -> str:
     return part.strip().lower()
 
 
+# =========================
+# 🔥 PART INTELLIGENCE
+# =========================
+def detect_part_info(part):
+
+    part = part.upper()
+
+    if part.startswith("6ES7"):
+        return {
+            "manufacturer": "Siemens",
+            "category": "PLC Module",
+            "description": "Siemens SIMATIC S7 industrial PLC module"
+        }
+
+    if part.startswith("3RT"):
+        return {
+            "manufacturer": "Siemens",
+            "category": "Contactor",
+            "description": "Siemens industrial contactor"
+        }
+
+    if part.startswith("NBB"):
+        return {
+            "manufacturer": "Pepperl+Fuchs",
+            "category": "Proximity Sensor",
+            "description": "Industrial inductive proximity sensor"
+        }
+
+    if part.startswith("FX"):
+        return {
+            "manufacturer": "Mitsubishi",
+            "category": "PLC",
+            "description": "Mitsubishi industrial PLC controller"
+        }
+
+    return {
+        "manufacturer": None,
+        "category": "Industrial Automation Component",
+        "description": "Industrial automation spare part"
+    }
+
+
+# =========================
+# 🔥 ENRICH RESULTS
+# =========================
+def enrich_results(results):
+
+    enriched = []
+
+    for item in results:
+
+        part = item.get("part_number")
+
+        intelligence = detect_part_info(part)
+
+        item["manufacturer"] = intelligence["manufacturer"]
+        item["category"] = intelligence["category"]
+        item["description"] = intelligence["description"]
+
+        enriched.append(item)
+
+    return enriched
+
+
 def rank_results(results, query: str):
-    """
-    Ranking priority:
-    - Exact match = 100
-    - Startswith = 70
-    - Contains = 50
-    """
 
     ranked = []
     query_normalized = normalize_part(query)
@@ -41,10 +99,6 @@ def rank_results(results, query: str):
 
 
 def merge_results(local_results, nexar_results):
-    """
-    Merge without duplicates
-    Local results overwrite Nexar if same part_number
-    """
 
     merged = {}
 
@@ -75,20 +129,19 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
     logger.info(f"Search started | Query: {part_number} | Page: {page}")
 
     try:
-        # 🔹 Cache Key (includes pagination)
+
         cache_key = f"{part_number}:{page}:{limit}"
 
-        # 🔹 1️⃣ Check Cache
         cached = get_cache(cache_key)
         if cached:
             logger.info("Cache hit")
             return cached
 
-        # 🔹 2️⃣ Search Local
+        # 🔹 Local search
         local_results = search_local(part_number) or []
         local_results = rank_results(local_results, part_number)
 
-        # 🔹 3️⃣ Decide if Nexar needed
+        # 🔹 Nexar decision
         need_external = (
             not local_results or
             any(not item.get("price") for item in local_results)
@@ -101,7 +154,7 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
             nexar_results = search_nexar(part_number) or []
             nexar_results = rank_results(nexar_results, part_number)
 
-        # 🔹 4️⃣ Merge logic
+        # 🔹 Merge
         if local_results and nexar_results:
             final_results = merge_results(local_results, nexar_results)
             final_results = rank_results(final_results, part_number)
@@ -115,6 +168,9 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
 
         else:
             response = build_response("Not Found", [])
+
+        # 🔥 ENRICH RESULTS
+        response["results"] = enrich_results(response["results"])
 
         # 🔹 Pagination
         total_results = len(response["results"])
@@ -132,7 +188,6 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
             "results": paginated_results
         }
 
-        # 🔹 Save paginated result to cache
         set_cache(cache_key, paginated_response)
 
         execution_time = round(time.time() - start_time, 4)

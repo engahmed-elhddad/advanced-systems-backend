@@ -88,6 +88,25 @@ def detect_part_info(part):
 
 
 # =========================
+# 🔥 DATASHEET ENGINE
+# =========================
+def guess_datasheet(part, manufacturer):
+
+    part = part.upper()
+
+    if manufacturer == "Siemens":
+        return f"https://www.google.com/search?q={part}+siemens+datasheet+pdf"
+
+    if manufacturer == "Pepperl+Fuchs":
+        return f"https://www.google.com/search?q={part}+pepperl+fuchs+datasheet+pdf"
+
+    if manufacturer == "Mitsubishi":
+        return f"https://www.google.com/search?q={part}+mitsubishi+datasheet+pdf"
+
+    return f"https://www.google.com/search?q={part}+datasheet+pdf"
+
+
+# =========================
 # Public Search
 # =========================
 @app.get("/search")
@@ -103,6 +122,11 @@ def get_product(part_number: str):
 
     intelligence = detect_part_info(part_number)
 
+    datasheet = guess_datasheet(
+        part_number,
+        intelligence["manufacturer"]
+    )
+
     results = search_local(part_number)
 
     if results:
@@ -113,6 +137,7 @@ def get_product(part_number: str):
             "manufacturer": intelligence["manufacturer"],
             "category": intelligence["category"],
             "description": intelligence["description"],
+            "datasheet": datasheet,
             "price": product["price"],
             "availability": product["availability"],
             "condition": product.get("condition") or "Used",
@@ -124,6 +149,7 @@ def get_product(part_number: str):
         "manufacturer": intelligence["manufacturer"],
         "category": intelligence["category"],
         "description": intelligence["description"],
+        "datasheet": datasheet,
         "price": None,
         "availability": "Not in Stock",
         "condition": None,
