@@ -1,46 +1,95 @@
-def get_related_parts(part_number):
+# services/parts_graph.py
 
-    prefix = part_number[:6]
-
-    return {
-        "type": "related",
-        "prefix": prefix
-    }
+import re
 
 
-def get_replacement_parts(part_number):
+def normalize_part(part_number: str):
 
-    if "315" in part_number:
+    if not part_number:
+        return ""
 
-        return [
-            "6ES7-315-2EH14-0AB0",
-            "6ES7-315-6FF04-0AB0"
-        ]
+    p = part_number.upper()
 
-    return []
+    p = p.replace(" ", "")
+    p = p.replace("_", "-")
 
-
-def get_accessories(part_number):
-
-    if part_number.startswith("6ES7"):
-
-        return [
-            "6ES7-972-0BB12-0XA0",
-            "6ES7-972-0BA52-0XA0"
-        ]
-
-    return []
+    return p
 
 
-def get_compatible_modules(part_number):
+def extract_series(part_number: str):
 
-    if part_number.startswith("6ES7"):
+    """
+    Extract the main industrial series
+    Example:
+    6ES7315-2EH14-0AB0 → 6ES7315
+    """
 
-        return [
-            "SM321",
-            "SM322",
-            "SM331",
-            "SM332"
-        ]
+    p = normalize_part(part_number)
 
-    return []
+    segments = re.split(r"[-/]", p)
+
+    return segments[0]
+
+
+# =========================
+# RELATED PARTS
+# =========================
+
+def get_related_parts(part_number: str):
+
+    series = extract_series(part_number)
+
+    return [
+        {
+            "type": "series_related",
+            "series": series
+        }
+    ]
+
+
+# =========================
+# REPLACEMENTS
+# =========================
+
+def get_replacement_parts(part_number: str):
+
+    series = extract_series(part_number)
+
+    return [
+        {
+            "type": "replacement_candidate",
+            "series": series
+        }
+    ]
+
+
+# =========================
+# ACCESSORIES
+# =========================
+
+def get_accessories(part_number: str):
+
+    series = extract_series(part_number)
+
+    return [
+        {
+            "type": "possible_accessory",
+            "series": series
+        }
+    ]
+
+
+# =========================
+# COMPATIBLE MODULES
+# =========================
+
+def get_compatible_modules(part_number: str):
+
+    series = extract_series(part_number)
+
+    return [
+        {
+            "type": "compatible_module",
+            "series": series
+        }
+    ]

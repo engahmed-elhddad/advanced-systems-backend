@@ -1,26 +1,46 @@
-def get_datasheet(part: str):
+# services/datasheet_service.py
 
-    part = part.upper()
+def normalize_part(part_number: str):
 
-    # Siemens PLC
-    if part.startswith("6ES7"):
-        return f"https://support.industry.siemens.com/cs/attachments/{part}/{part}.pdf"
+    if not part_number:
+        return ""
 
-    # Siemens Contactors
-    if part.startswith("3RT"):
-        return "https://cache.industry.siemens.com/dl/files/686/109476686/att_109476686/v1/3rt_contactors.pdf"
+    p = part_number.upper()
 
-    # Schneider
-    if part.startswith("LC1D"):
-        return f"https://download.schneider-electric.com/files?p_Doc_Ref={part}"
+    p = p.replace(" ", "")
+    p = p.replace("_", "-")
 
-    # Pepperl Fuchs
-    if part.startswith("NBB"):
-        return f"https://files.pepperl-fuchs.com/webcat/navi/productInfo/doct/{part}.pdf"
+    return p
 
-    # Mitsubishi
-    if part.startswith("FX"):
-        return "https://dl.mitsubishielectric.com/fa/document/manual/plc_fx_series.pdf"
 
-    # Generic fallback
-    return None
+def get_datasheet(part_number: str):
+
+    """
+    Generate possible datasheet sources for industrial parts
+    """
+
+    p = normalize_part(part_number)
+
+    datasheets = [
+
+        # manufacturer search
+        f"https://www.google.com/search?q={p}+datasheet",
+
+        # RS Components
+        f"https://www.rs-online.com/search/results/?query={p}",
+
+        # Farnell / Element14
+        f"https://www.element14.com/search?st={p}",
+
+        # Mouser
+        f"https://www.mouser.com/c/?q={p}",
+
+        # DigiKey
+        f"https://www.digikey.com/en/products/result?keywords={p}",
+
+        # Radwell
+        f"https://www.radwell.com/en-US/Buy/?term={p}"
+
+    ]
+
+    return datasheets

@@ -1,8 +1,9 @@
 from services.local_service import search_local
 from services.nexar_service import search_nexar
 from services.cache_layer import get_cache, set_cache
-from logging_config import logger
+from services.brand_category_engine import detect_brand, detect_category
 
+from logging_config import logger
 import time
 
 
@@ -11,49 +12,33 @@ def normalize_part(part: str) -> str:
 
 
 # =========================
-# 🔥 PART INTELLIGENCE
+# PART INTELLIGENCE (Dynamic)
 # =========================
 def detect_part_info(part):
 
+    if not part:
+        return {
+            "manufacturer": "Industrial",
+            "category": "Industrial Component",
+            "description": "Industrial automation spare part"
+        }
+
     part = part.upper()
 
-    if part.startswith("6ES7"):
-        return {
-            "manufacturer": "Siemens",
-            "category": "PLC Module",
-            "description": "Siemens SIMATIC S7 industrial PLC module"
-        }
+    brand = detect_brand(part)
+    category = detect_category(part)
 
-    if part.startswith("3RT"):
-        return {
-            "manufacturer": "Siemens",
-            "category": "Contactor",
-            "description": "Siemens industrial contactor"
-        }
-
-    if part.startswith("NBB"):
-        return {
-            "manufacturer": "Pepperl+Fuchs",
-            "category": "Proximity Sensor",
-            "description": "Industrial inductive proximity sensor"
-        }
-
-    if part.startswith("FX"):
-        return {
-            "manufacturer": "Mitsubishi",
-            "category": "PLC",
-            "description": "Mitsubishi industrial PLC controller"
-        }
+    description = f"{brand} {category} industrial automation component"
 
     return {
-        "manufacturer": None,
-        "category": "Industrial Automation Component",
-        "description": "Industrial automation spare part"
+        "manufacturer": brand,
+        "category": category,
+        "description": description
     }
 
 
 # =========================
-# 🔥 ENRICH RESULTS
+# ENRICH RESULTS
 # =========================
 def enrich_results(results):
 
@@ -74,6 +59,9 @@ def enrich_results(results):
     return enriched
 
 
+# =========================
+# RANK RESULTS
+# =========================
 def rank_results(results, query: str):
 
     ranked = []
@@ -98,6 +86,9 @@ def rank_results(results, query: str):
     return [item[1] for item in ranked]
 
 
+# =========================
+# MERGE LOCAL + NEXAR
+# =========================
 def merge_results(local_results, nexar_results):
 
     merged = {}
@@ -113,6 +104,9 @@ def merge_results(local_results, nexar_results):
     return list(merged.values())
 
 
+# =========================
+# BUILD RESPONSE
+# =========================
 def build_response(source, results):
     return {
         "source": source,
@@ -121,6 +115,9 @@ def build_response(source, results):
     }
 
 
+# =========================
+# MAIN SEARCH ENGINE
+# =========================
 def search_part(part_number: str, page: int = 1, limit: int = 20):
 
     start_time = time.time()
@@ -137,11 +134,17 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
             logger.info("Cache hit")
             return cached
 
-        # 🔹 Local search
+        # =========================
+        # Local search
+        # =========================
+
         local_results = search_local(part_number) or []
         local_results = rank_results(local_results, part_number)
 
-        # 🔹 Nexar decision
+        # =========================
+        # Nexar fallback decision
+        # =========================
+
         need_external = (
             not local_results or
             any(not item.get("price") for item in local_results)
@@ -154,25 +157,39 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
             nexar_results = search_nexar(part_number) or []
             nexar_results = rank_results(nexar_results, part_number)
 
-        # 🔹 Merge
+        # =========================
+        # Merge results
+        # =========================
+
         if local_results and nexar_results:
+
             final_results = merge_results(local_results, nexar_results)
             final_results = rank_results(final_results, part_number)
+
             response = build_response("Local + Nexar", final_results)
 
         elif local_results:
+
             response = build_response("Local Database", local_results)
 
         elif nexar_results:
+
             response = build_response("Nexar", nexar_results)
 
         else:
+
             response = build_response("Not Found", [])
 
-        # 🔥 ENRICH RESULTS
+        # =========================
+        # Enrich results
+        # =========================
+
         response["results"] = enrich_results(response["results"])
 
-        # 🔹 Pagination
+        # =========================
+        # Pagination
+        # =========================
+
         total_results = len(response["results"])
 
         start = (page - 1) * limit
@@ -191,6 +208,7 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
         set_cache(cache_key, paginated_response)
 
         execution_time = round(time.time() - start_time, 4)
+
         logger.info(
             f"Search completed | Source: {response['source']} | "
             f"Total: {total_results} | Page: {page} | Time: {execution_time}s"
@@ -199,7 +217,9 @@ def search_part(part_number: str, page: int = 1, limit: int = 20):
         return paginated_response
 
     except Exception as e:
+
         logger.error(f"Search error | Query: {part_number} | Error: {str(e)}")
+
         return {
             "source": "Error",
             "total_results": 0,

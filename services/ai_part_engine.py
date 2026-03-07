@@ -1,4 +1,4 @@
-# services/part_intelligence.py
+# services/ai_part_engine.py
 
 import re
 
@@ -20,10 +20,6 @@ def normalize_part(part_number: str):
 
 def extract_series(part_number: str):
 
-    """
-    Extract main series of industrial part
-    """
-
     p = normalize_part(part_number)
 
     segments = re.split(r"[-/]", p)
@@ -31,7 +27,34 @@ def extract_series(part_number: str):
     return segments[0]
 
 
-def detect_part_info(part_number: str):
+def detect_structure(part_number: str):
+
+    """
+    Analyze structure of part number
+    """
+
+    p = normalize_part(part_number)
+
+    letters = sum(c.isalpha() for c in p)
+
+    numbers = sum(c.isdigit() for c in p)
+
+    length = len(p)
+
+    return {
+
+        "letters": letters,
+        "numbers": numbers,
+        "length": length
+
+    }
+
+
+def analyze_part_number(part_number: str):
+
+    """
+    Universal industrial part analyzer
+    """
 
     if not part_number:
         return None
@@ -44,6 +67,8 @@ def detect_part_info(part_number: str):
 
     series = extract_series(p)
 
+    structure = detect_structure(p)
+
     description = f"{brand} {category} industrial automation component"
 
     return {
@@ -53,6 +78,8 @@ def detect_part_info(part_number: str):
         "category": category,
 
         "series": series,
+
+        "structure": structure,
 
         "description": description
 

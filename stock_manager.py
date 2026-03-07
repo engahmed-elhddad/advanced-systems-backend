@@ -34,6 +34,13 @@ with tab1:
 
     price = st.number_input("Price", min_value=0)
 
+    # 🔥 Image Upload
+    images = st.file_uploader(
+        "Upload Product Images",
+        type=["jpg", "jpeg", "png"],
+        accept_multiple_files=True
+    )
+
     if st.button("Save Product"):
 
         data = {
@@ -48,8 +55,23 @@ with tab1:
         res = requests.post(f"{API}/add-product", json=data)
 
         if res.status_code == 200:
+
+            # Upload images
+            if images:
+
+                for img in images:
+
+                    files = {"file": img}
+
+                    requests.post(
+                        f"{API}/upload-product-image/{part}",
+                        files=files
+                    )
+
             st.success("Product Added Successfully")
+
         else:
+
             st.error("Error Adding Product")
 
 
