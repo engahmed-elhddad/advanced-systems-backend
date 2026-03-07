@@ -64,6 +64,7 @@ app = FastAPI(
     version="1.0"
 )
 
+Base.metadata.create_all(bind=engine)
 
 # =========================
 # CORS
@@ -85,7 +86,7 @@ app.add_middleware(
 # CREATE TABLES
 # =========================
 
-Base.metadata.create_all(bind=engine)
+
 
 
 # =========================
