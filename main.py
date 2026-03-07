@@ -34,6 +34,8 @@ from services.industrial_ai_matching_engine import industrial_ai_matching
 
 from services.part_normalizer import normalize_part_number
 from services.industrial_part_parser import parse_industrial_part
+from services.global_parts_index import generate_global_parts
+
 
 
 # =========================
@@ -214,7 +216,9 @@ def search(query: str):
         family = generate_part_family(query)
         discovered = discover_similar_parts(query)
 
-        expanded = variants + family + discovered
+        global_parts = generate_global_parts()
+
+        expanded = variants + family + discovered + global_parts
 
         existing = {r["part_number"] for r in results}
 
