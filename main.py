@@ -66,6 +66,7 @@ app = FastAPI(
 
 Base.metadata.create_all(bind=engine)
 
+
 # =========================
 # CORS
 # =========================
@@ -80,13 +81,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# =========================
-# CREATE TABLES
-# =========================
-
-
 
 
 # =========================
@@ -227,7 +221,16 @@ def get_product(part_number: str):
 
     parsed = parse_industrial_part(part_number)
 
-    intelligence = detect_part_info(part_number) or analyze_part_number(part_number)
+    if not parsed:
+        parsed = {}
+
+    intelligence = detect_part_info(part_number)
+
+    if not intelligence:
+        intelligence = analyze_part_number(part_number)
+
+    if not intelligence:
+        intelligence = {}
 
     brand = parsed.get("brand") or detect_brand(part_number)
     category = parsed.get("category") or detect_category(part_number)
@@ -237,7 +240,7 @@ def get_product(part_number: str):
 
     description = intelligence.get(
         "description",
-        "Industrial automation spare part"
+        f"{part_number} industrial automation spare part"
     )
 
     title = f"{part_number} | {brand} {category}"
