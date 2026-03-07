@@ -166,10 +166,6 @@ def get_product(part_number: str):
 
     results = search_local(part_number)
 
-    # =========================
-    # Auto Product Image
-    # =========================
-
     image_url = f"https://static.radwell.com/images/products/{part_number}.jpg"
 
     if results:
@@ -221,6 +217,35 @@ def get_product(part_number: str):
 
         "rfq_available": True
     }
+
+
+# =========================
+# Related Parts Engine
+# =========================
+
+@app.get("/related/{part_number}")
+def related_parts(part_number: str):
+
+    db = SessionLocal()
+
+    try:
+
+        prefix = part_number[:6]
+
+        products = db.query(Product).filter(
+            Product.part_number.like(f"{prefix}%")
+        ).limit(6).all()
+
+        return {
+            "results": [
+                {"part_number": p.part_number}
+                for p in products
+            ]
+        }
+
+    finally:
+
+        db.close()
 
 
 # =========================
