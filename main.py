@@ -335,6 +335,42 @@ def get_product(part_number: str):
         "rfq_available": True
     }
 
+# =========================
+# AUTOCOMPLETE
+# =========================
+
+@app.get("/autocomplete")
+def autocomplete(query: str):
+
+    query = normalize_part_number(query)
+
+    db = SessionLocal()
+
+    try:
+
+        products = db.query(Product).all()
+
+        results = []
+
+        for product in products:
+
+            part = product.part_number.upper()
+
+            if part.startswith(query):
+
+                results.append({
+                    "part_number": part
+                })
+
+        return {
+            "query": query,
+            "results": results[:10]
+        }
+
+    finally:
+
+        db.close()
+
 
 # =========================
 # RFQ
