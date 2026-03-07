@@ -15,7 +15,12 @@ from services.nexar_service import search_nexar
 from services.part_intelligence import detect_part_info
 from services.datasheet_service import get_datasheet
 from services.supplier_service import get_suppliers
-
+from services.parts_graph import (
+    get_related_parts,
+    get_replacement_parts,
+    get_accessories,
+    get_compatible_modules,
+)
 
 # =========================
 # Load ENV
@@ -24,13 +29,11 @@ from services.supplier_service import get_suppliers
 load_dotenv()
 ADMIN_API_KEY = os.getenv("ADMIN_API_KEY")
 
-
 # =========================
 # App
 # =========================
 
 app = FastAPI(title="Advanced Systems API")
-
 
 # =========================
 # CORS
@@ -48,13 +51,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # =========================
 # Create tables
 # =========================
 
 Base.metadata.create_all(bind=engine)
-
 
 # =========================
 # API Models
@@ -147,7 +148,7 @@ def update_stock(data: StockUpdate):
 # =========================
 
 @app.get("/search")
-def search(part: str, page: int = 1, limit: int = 20):
+def search(part: str):
     return engine_search(part)
 
 
@@ -166,7 +167,19 @@ def get_product(part_number: str):
 
     results = search_local(part_number)
 
+    # Parts Graph Engines
+    related = get_related_parts(part_number)
+    replacement = get_replacement_parts(part_number)
+    accessories = get_accessories(part_number)
+    compatible = get_compatible_modules(part_number)
+
     image_url = f"https://static.radwell.com/images/products/{part_number}.jpg"
+
+    brand = intelligence.get("manufacturer", "Industrial")
+    category = intelligence.get("category", "Component")
+    description = intelligence.get("description", "Industrial automation component")
+
+    title = f"{part_number} {brand} {category}"
 
     if results:
 
@@ -174,17 +187,21 @@ def get_product(part_number: str):
 
         return {
 
-            "part_number": product["part_number"],
-            "brand": intelligence["manufacturer"],
-            "category": intelligence["category"],
-            "description": intelligence["description"],
+            "related_parts": related,
+            "replacement_parts": replacement,
+            "accessories": accessories,
+            "compatible_modules": compatible,
 
-            "title": f"{part_number} {intelligence['manufacturer']} Industrial Component",
-            "seo_description": intelligence["description"],
+            "part_number": product["part_number"],
+            "brand": brand,
+            "category": category,
+            "description": description,
+
+            "title": title,
+            "seo_description": description,
 
             "datasheet": datasheet,
             "suppliers": suppliers,
-
             "image": image_url,
 
             "price": product["price"],
@@ -197,17 +214,21 @@ def get_product(part_number: str):
 
     return {
 
-        "part_number": part_number,
-        "brand": intelligence["manufacturer"],
-        "category": intelligence["category"],
-        "description": intelligence["description"],
+        "related_parts": related,
+        "replacement_parts": replacement,
+        "accessories": accessories,
+        "compatible_modules": compatible,
 
-        "title": f"{part_number} {intelligence['manufacturer']} Industrial Component",
-        "seo_description": intelligence["description"],
+        "part_number": part_number,
+        "brand": brand,
+        "category": category,
+        "description": description,
+
+        "title": title,
+        "seo_description": description,
 
         "datasheet": datasheet,
         "suppliers": suppliers,
-
         "image": image_url,
 
         "price": None,
@@ -256,7 +277,6 @@ def related_parts(part_number: str):
 def create_rfq(rfq: RFQRequest):
 
     return {
-
         "status": "RFQ received",
         "part_number": rfq.part_number,
         "quantity": rfq.quantity,
@@ -275,23 +295,17 @@ def create_quotation(data: OrderRequest):
     db = SessionLocal()
 
     new_order = Order(
-
         part_number=data.part_number,
         quantity=data.quantity,
         customer=data.customer,
         status="quotation",
         created_at=str(datetime.now())
-
     )
 
     db.add(new_order)
-
     db.commit()
 
-    return {
-
-        "status": "Quotation Created"
-    }
+    return {"status": "Quotation Created"}
 
 
 # =========================
@@ -317,13 +331,11 @@ def confirm_order(order_id: int):
         return {"error": "Not enough stock"}
 
     product.quantity -= order.quantity
-
     order.status = "confirmed"
 
     db.commit()
 
     return {
-
         "status": "Order confirmed",
         "remaining_stock": product.quantity
     }
@@ -342,8 +354,7 @@ def admin_nexar_search(part: str, x_api_key: str = Header(None)):
     results = search_nexar(part)
 
     return {
-
-        "source": "Nexar (Manual Admin)",
+        "source": "Nexar",
         "count": len(results),
         "results": results
     }
@@ -362,17 +373,12 @@ def all_products():
 
         products = db.query(Product).all()
 
-        results = [
-
-            {"part_number": p.part_number}
-
-            for p in products
-        ]
-
         return {
-
-            "count": len(results),
-            "results": results
+            "count": len(products),
+            "results": [
+                {"part_number": p.part_number}
+                for p in products
+            ]
         }
 
     finally:
@@ -407,6 +413,43 @@ def sitemap():
     """
 
     return Response(content=xml, media_type="application/xml")
+
+
+# =========================
+# Category Products
+# =========================
+
+@app.get("/category/{category_name}")
+def get_category_products(category_name: str):
+
+    db = SessionLocal()
+
+    try:
+
+        products = db.query(Product).limit(50).all()
+
+        results = []
+
+        for p in products:
+
+            intelligence = detect_part_info(p.part_number)
+
+            if intelligence.get("category"):
+
+                if category_name.lower() in intelligence["category"].lower():
+
+                    results.append({
+                        "part_number": p.part_number,
+                        "category": intelligence["category"]
+                    })
+
+        return {
+            "category": category_name,
+            "results": results
+        }
+
+    finally:
+        db.close()
 
 
 # =========================
