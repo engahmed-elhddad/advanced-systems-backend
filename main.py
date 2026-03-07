@@ -168,6 +168,29 @@ def smart_search(query, products):
 # SEARCH ENGINE
 # =========================
 
+# =========================
+# SMART INDUSTRIAL SEARCH
+# =========================
+
+@app.get("/smart-search")
+def smart_industrial_search(query: str):
+
+    query = normalize_part_number(query)
+
+    brand = detect_brand(query)
+    category = detect_category(query)
+
+    ai_results = industrial_ai_matching(query)
+
+    return {
+        "query": query,
+        "brand_detected": brand,
+        "category_detected": category,
+        "results": ai_results[:20]
+    }
+
+
+
 @app.get("/search")
 def search(query: str):
 
