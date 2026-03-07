@@ -460,3 +460,82 @@ def home():
     return {
         "message": "Advanced Systems Backend Running 🚀"
     }
+
+# =========================
+# INDUSTRIAL BRANDS
+# =========================
+
+BRANDS = [
+
+"Siemens",
+"Schneider Electric",
+"Allen Bradley",
+"ABB",
+"Omron",
+"Pilz",
+"Endress+Hauser",
+"Pepperl+Fuchs",
+"Turck",
+"Sick",
+"IFM",
+"Festo",
+"SMC",
+"Keyence",
+"Mitsubishi",
+"Vega",
+"Beckhoff",
+"Bosch Rexroth",
+"Wago",
+"Phoenix Contact",
+"Lenze",
+"Yokogawa",
+"B&R Automation"
+
+]
+
+
+# =========================
+# BRANDS LIST
+# =========================
+
+@app.get("/brands")
+def get_brands():
+
+    return {
+        "count": len(BRANDS),
+        "brands": BRANDS
+    }
+
+
+# =========================
+# BRAND PAGE
+# =========================
+
+@app.get("/brand/{brand_name}")
+def get_brand(brand_name: str):
+
+    brand_name = brand_name.lower()
+
+    return {
+
+        "brand": brand_name,
+
+        "description": f"{brand_name} industrial automation products supplier",
+
+        "categories":[
+            "PLC",
+            "Drives",
+            "Sensors",
+            "Power Supplies",
+            "Safety Systems",
+            "HMI",
+            "Industrial Networking"
+        ],
+
+        "top_products":[
+            f"{brand_name} PLC",
+            f"{brand_name} Drives",
+            f"{brand_name} Sensors"
+        ]
+
+    }
