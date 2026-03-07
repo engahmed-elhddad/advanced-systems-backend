@@ -179,6 +179,25 @@ def smart_search(query, products):
 # =========================
 # SMART INDUSTRIAL SEARCH
 # =========================
+@app.get("/discover/{part_number}")
+def discover_parts(part_number: str):
+
+    part_number = normalize_part_number(part_number)
+
+    variants = generate_part_variants(part_number)
+    family = generate_part_family(part_number)
+    discovered = discover_similar_parts(part_number)
+
+    parts = list(set(
+        [part_number] + variants + family + discovered
+    ))
+
+    return {
+        "seed": part_number,
+        "count": len(parts),
+        "parts": parts[:500]
+    }
+
 
 @app.get("/smart-search")
 def smart_industrial_search(query: str):
