@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
 from pydantic import BaseModel
 import os
 import random
@@ -37,7 +36,6 @@ from services.industrial_part_parser import parse_industrial_part
 from services.global_parts_index import generate_global_parts
 
 
-
 # =========================
 # API MODELS
 # =========================
@@ -67,7 +65,6 @@ app = FastAPI(
 )
 
 Base.metadata.create_all(bind=engine)
-
 
 
 # =========================
@@ -101,10 +98,9 @@ def get_market_suppliers(part_number):
     results = []
 
     for s in suppliers:
-
         results.append({
             "name": s,
-            "price": random.randint(800, 1200),
+            "price": random.randint(800,1200),
             "currency": "USD",
             "lead_time": "3-7 days"
         })
@@ -120,7 +116,7 @@ def generate_virtual_product(part_number):
 
     p = normalize_part_number(part_number)
 
-    parsed = parse_industrial_part(p)
+    parsed = parse_industrial_part(p) or {}
 
     brand = parsed.get("brand") or detect_brand(p)
     category = parsed.get("category") or detect_category(p)
@@ -137,6 +133,7 @@ def generate_virtual_product(part_number):
         "description": f"{p} industrial automation spare part used in industrial control systems",
     }
 
+
 # =========================
 # SMART SEARCH
 # =========================
@@ -144,13 +141,11 @@ def generate_virtual_product(part_number):
 def smart_search(query, products):
 
     query = query.lower()
-
     results = []
 
     for p in products:
 
         part = p.part_number.lower()
-
         score = 0
 
         if part == query:
@@ -173,12 +168,9 @@ def smart_search(query, products):
 
 
 # =========================
-# SEARCH ENGINE
+# DISCOVER PARTS
 # =========================
 
-# =========================
-# SMART INDUSTRIAL SEARCH
-# =========================
 @app.get("/discover/{part_number}")
 def discover_parts(part_number: str):
 
@@ -199,6 +191,10 @@ def discover_parts(part_number: str):
     }
 
 
+# =========================
+# SMART AI SEARCH
+# =========================
+
 @app.get("/smart-search")
 def smart_industrial_search(query: str):
 
@@ -217,6 +213,9 @@ def smart_industrial_search(query: str):
     }
 
 
+# =========================
+# SEARCH ENGINE
+# =========================
 
 @app.get("/search")
 def search(query: str):
@@ -228,7 +227,6 @@ def search(query: str):
     try:
 
         products = db.query(Product).all()
-
         results = smart_search(query, products)
 
         variants = generate_part_variants(query)
@@ -262,33 +260,6 @@ def search(query: str):
 
         db.close()
 
-# =========================
-# AUTO DISCOVERY
-# =========================
-
-@app.get("/discover/{part_number}")
-def discover_parts(part_number: str):
-
-    part_number = normalize_part_number(part_number)
-
-    variants = generate_part_variants(part_number)
-    family = generate_part_family(part_number)
-    discovered = discover_similar_parts(part_number)
-
-    results = list(set(
-        variants +
-        family +
-        discovered
-    ))
-
-    return {
-        "query": part_number,
-        "count": len(results),
-        "parts": results[:200]
-    }
-
-
-
 
 # =========================
 # PRODUCT PAGE
@@ -299,18 +270,9 @@ def get_product(part_number: str):
 
     part_number = normalize_part_number(part_number)
 
-    parsed = parse_industrial_part(part_number)
+    parsed = parse_industrial_part(part_number) or {}
 
-    if not parsed:
-        parsed = {}
-
-    intelligence = detect_part_info(part_number)
-
-    if not intelligence:
-        intelligence = analyze_part_number(part_number)
-
-    if not intelligence:
-        intelligence = {}
+    intelligence = detect_part_info(part_number) or analyze_part_number(part_number) or {}
 
     brand = parsed.get("brand") or detect_brand(part_number)
     category = parsed.get("category") or detect_category(part_number)
@@ -323,11 +285,8 @@ def get_product(part_number: str):
         f"{part_number} industrial automation spare part"
     )
 
-    title = f"{part_number} | {brand} {category}"
-
     datasheet = get_datasheet(part_number)
     suppliers = get_suppliers(part_number)
-
     market_suppliers = get_market_suppliers(part_number)
 
     results = search_local(part_number)
@@ -338,11 +297,9 @@ def get_product(part_number: str):
     compatible = get_compatible_modules(part_number)
 
     cross_reference = get_cross_reference(part_number)
-
     ai_matching = industrial_ai_matching(part_number)
 
     images = get_product_image(part_number)
-
 
     if results:
 
@@ -357,9 +314,6 @@ def get_product(part_number: str):
             "series": series,
 
             "description": description,
-
-            "title": title,
-            "seo_description": description,
 
             "images": images,
             "datasheet": datasheet,
@@ -389,12 +343,6 @@ def get_product(part_number: str):
 
         **virtual,
 
-        "family": family,
-        "series": series,
-
-        "title": title,
-        "seo_description": description,
-
         "images": images,
         "datasheet": datasheet,
 
@@ -410,9 +358,9 @@ def get_product(part_number: str):
         "ai_matching": ai_matching,
 
         "availability": "Available on Request",
-
         "rfq_available": True
     }
+
 
 # =========================
 # AUTOCOMPLETE
@@ -428,7 +376,6 @@ def autocomplete(query: str):
     try:
 
         products = db.query(Product).all()
-
         results = []
 
         for product in products:
@@ -470,52 +417,19 @@ def create_rfq(rfq: RFQRequest):
 
 
 # =========================
-# HEALTH CHECK
-# =========================
-
-@app.get("/")
-def home():
-
-    return {
-        "message": "Advanced Systems Backend Running 🚀"
-    }
-
-# =========================
 # INDUSTRIAL BRANDS
 # =========================
 
 BRANDS = [
 
-"Siemens",
-"Schneider Electric",
-"Allen Bradley",
-"ABB",
-"Omron",
-"Pilz",
-"Endress+Hauser",
-"Pepperl+Fuchs",
-"Turck",
-"Sick",
-"IFM",
-"Festo",
-"SMC",
-"Keyence",
-"Mitsubishi",
-"Vega",
-"Beckhoff",
-"Bosch Rexroth",
-"Wago",
-"Phoenix Contact",
-"Lenze",
-"Yokogawa",
-"B&R Automation"
+"Siemens","Schneider Electric","Allen Bradley","ABB","Omron",
+"Pilz","Endress+Hauser","Pepperl+Fuchs","Turck","Sick",
+"IFM","Festo","SMC","Keyence","Mitsubishi",
+"Vega","Beckhoff","Bosch Rexroth","Wago",
+"Phoenix Contact","Lenze","Yokogawa","B&R Automation"
 
 ]
 
-
-# =========================
-# BRANDS LIST
-# =========================
 
 @app.get("/brands")
 def get_brands():
@@ -525,10 +439,6 @@ def get_brands():
         "brands": BRANDS
     }
 
-
-# =========================
-# BRAND PAGE
-# =========================
 
 @app.get("/brand/{brand_name}")
 def get_brand(brand_name: str):
@@ -557,4 +467,16 @@ def get_brand(brand_name: str):
             f"{brand_name} Sensors"
         ]
 
+    }
+
+
+# =========================
+# HEALTH CHECK
+# =========================
+
+@app.get("/")
+def home():
+
+    return {
+        "message": "Advanced Systems Backend Running 🚀"
     }
