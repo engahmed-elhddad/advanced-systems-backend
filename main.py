@@ -118,16 +118,22 @@ def generate_virtual_product(part_number):
 
     p = normalize_part_number(part_number)
 
-    brand = detect_brand(p)
-    category = detect_category(p)
+    parsed = parse_industrial_part(p)
+
+    brand = parsed.get("brand") or detect_brand(p)
+    category = parsed.get("category") or detect_category(p)
+
+    family = parsed.get("family")
+    series = parsed.get("series")
 
     return {
         "part_number": p,
         "brand": brand,
         "category": category,
+        "family": family,
+        "series": series,
         "description": f"{p} industrial automation spare part used in industrial control systems",
     }
-
 
 # =========================
 # SMART SEARCH
@@ -232,6 +238,33 @@ def search(query: str):
     finally:
 
         db.close()
+
+# =========================
+# AUTO DISCOVERY
+# =========================
+
+@app.get("/discover/{part_number}")
+def discover_parts(part_number: str):
+
+    part_number = normalize_part_number(part_number)
+
+    variants = generate_part_variants(part_number)
+    family = generate_part_family(part_number)
+    discovered = discover_similar_parts(part_number)
+
+    results = list(set(
+        variants +
+        family +
+        discovered
+    ))
+
+    return {
+        "query": part_number,
+        "count": len(results),
+        "parts": results[:200]
+    }
+
+
 
 
 # =========================
