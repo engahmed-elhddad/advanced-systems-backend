@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
 import os
 import random
 import csv
@@ -17,29 +18,15 @@ from models import Base, Product
 from services.local_service import search_local
 from services.part_intelligence import detect_part_info
 from services.datasheet_service import get_datasheet
-from services.supplier_service import get_suppliers
-
 from services.parts_graph import (
     get_related_parts,
     get_replacement_parts,
-    get_accessories,
-    get_compatible_modules,
 )
-
-from services.cross_reference_service import get_cross_reference
 from services.ai_part_engine import analyze_part_number
-
-from services.parts_index import generate_part_variants
-from services.global_parts_engine import generate_part_family
-from services.auto_discovery_engine import discover_similar_parts
 from services.image_service import get_product_image
-
 from services.brand_category_engine import detect_brand, detect_category
-from services.industrial_ai_matching_engine import industrial_ai_matching
-
 from services.part_normalizer import normalize_part_number
 from services.industrial_part_parser import parse_industrial_part
-from services.global_parts_index import generate_global_parts
 
 
 # =========================
@@ -97,53 +84,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# =========================
-# MARKET SUPPLIERS
-# =========================
-
-def get_market_suppliers(part_number):
-
-    suppliers = [
-        "Radwell",
-        "EU Automation",
-        "Classic Automation"
-    ]
-
-    results = []
-
-    for s in suppliers:
-
-        results.append({
-            "name": s,
-            "price": random.randint(800,1200),
-            "currency": "USD",
-            "lead_time": "3-7 days"
-        })
-
-    return results
-
-
-# =========================
-# VIRTUAL PRODUCT
-# =========================
-
-def generate_virtual_product(part_number):
-
-    p = normalize_part_number(part_number)
-
-    parsed = parse_industrial_part(p) or {}
-
-    brand = parsed.get("brand") or detect_brand(p)
-    category = parsed.get("category") or detect_category(p)
-
-    return {
-        "part_number": p,
-        "brand": brand,
-        "category": category,
-        "description": f"{p} industrial automation spare part"
-    }
 
 
 # =========================
@@ -234,10 +174,11 @@ def get_product(part_number: str):
             "rfq_available": False
         }
 
-    virtual = generate_virtual_product(part_number)
-
     return {
-        **virtual,
+        "part_number": part_number,
+        "brand": brand,
+        "category": category,
+        "description": description,
         "images": images,
         "datasheet": datasheet,
         "related_parts": related,
@@ -303,6 +244,99 @@ def create_rfq(rfq: RFQRequest):
 
 
 # =========================
+# ADMIN PRODUCT LIST
+# =========================
+
+@app.get("/admin/products")
+def admin_products(api_key: str = Header(None)):
+
+    verify_admin(api_key)
+
+    db = SessionLocal()
+
+    try:
+
+        products = db.query(Product).limit(200).all()
+
+        results = []
+
+        for p in products:
+
+            results.append({
+                "part_number": p.part_number,
+                "price": p.price,
+                "quantity": p.quantity,
+                "condition": p.condition,
+                "availability": p.availability
+            })
+
+        return {
+            "count": len(results),
+            "products": results
+        }
+
+    finally:
+
+        db.close()
+
+
+# =========================
+# ADMIN UPDATE PRODUCT
+# =========================
+
+@app.put("/admin/update-product")
+def update_product(data: dict, api_key: str = Header(None)):
+
+    verify_admin(api_key)
+
+    db = SessionLocal()
+
+    part = normalize_part_number(data["part_number"])
+
+    product = db.query(Product).filter(
+        Product.part_number == part
+    ).first()
+
+    if not product:
+
+        return {"error": "not found"}
+
+    product.price = data.get("price")
+    product.quantity = data.get("quantity")
+    product.condition = data.get("condition")
+    product.availability = data.get("availability")
+
+    db.commit()
+
+    return {"status": "updated"}
+
+
+# =========================
+# ADMIN DELETE PRODUCT
+# =========================
+
+@app.delete("/admin/delete-product/{part_number}")
+def delete_product(part_number: str, api_key: str = Header(None)):
+
+    verify_admin(api_key)
+
+    db = SessionLocal()
+
+    part = normalize_part_number(part_number)
+
+    product = db.query(Product).filter(
+        Product.part_number == part
+    ).first()
+
+    if product:
+
+        db.delete(product)
+        db.commit()
+
+    return {"status": "deleted"}
+
+
+# =========================
 # ADMIN IMPORT SYSTEM
 # =========================
 
@@ -311,10 +345,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @app.post("/admin/import-products")
-async def import_products(
-    file: UploadFile = File(...),
-    api_key: str = Header(None)
-):
+async def import_products(file: UploadFile = File(...), api_key: str = Header(None)):
 
     verify_admin(api_key)
 
@@ -369,10 +400,7 @@ async def import_products(
 
 
 @app.post("/admin/upload-image")
-async def upload_image(
-    file: UploadFile = File(...),
-    api_key: str = Header(None)
-):
+async def upload_image(file: UploadFile = File(...), api_key: str = Header(None)):
 
     verify_admin(api_key)
 
@@ -389,10 +417,7 @@ async def upload_image(
 
 
 @app.post("/admin/bulk-import")
-async def bulk_import(
-    file: UploadFile = File(...),
-    api_key: str = Header(None)
-):
+async def bulk_import(file: UploadFile = File(...), api_key: str = Header(None)):
 
     verify_admin(api_key)
 
