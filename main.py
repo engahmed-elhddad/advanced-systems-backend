@@ -6,6 +6,8 @@ import random
 import csv
 import io
 import shutil
+import zipfile
+import tempfile
 
 from dotenv import load_dotenv
 
@@ -196,28 +198,6 @@ def discover_parts(part_number: str):
 
 
 # =========================
-# SMART AI SEARCH
-# =========================
-
-@app.get("/smart-search")
-def smart_industrial_search(query: str):
-
-    query = normalize_part_number(query)
-
-    brand = detect_brand(query)
-    category = detect_category(query)
-
-    ai_results = industrial_ai_matching(query)
-
-    return {
-        "query": query,
-        "brand_detected": brand,
-        "category_detected": category,
-        "results": ai_results[:20]
-    }
-
-
-# =========================
 # SEARCH ENGINE
 # =========================
 
@@ -281,9 +261,6 @@ def get_product(part_number: str):
     brand = parsed.get("brand") or detect_brand(part_number)
     category = parsed.get("category") or detect_category(part_number)
 
-    family = parsed.get("family")
-    series = parsed.get("series")
-
     description = intelligence.get(
         "description",
         f"{part_number} industrial automation spare part"
@@ -291,17 +268,11 @@ def get_product(part_number: str):
 
     datasheet = get_datasheet(part_number)
     suppliers = get_suppliers(part_number)
-    market_suppliers = get_market_suppliers(part_number)
 
     results = search_local(part_number)
 
     related = get_related_parts(part_number)
     replacement = get_replacement_parts(part_number)
-    accessories = get_accessories(part_number)
-    compatible = get_compatible_modules(part_number)
-
-    cross_reference = get_cross_reference(part_number)
-    ai_matching = industrial_ai_matching(part_number)
 
     images = get_product_image(part_number)
 
@@ -310,57 +281,31 @@ def get_product(part_number: str):
         product = results[0]
 
         return {
-
             "part_number": product["part_number"],
             "brand": brand,
             "category": category,
-            "family": family,
-            "series": series,
-
             "description": description,
-
             "images": images,
             "datasheet": datasheet,
-
             "suppliers": suppliers,
-            "market_suppliers": market_suppliers,
-
             "related_parts": related,
             "replacement_parts": replacement,
-            "accessories": accessories,
-            "compatible_modules": compatible,
-            "cross_reference": cross_reference,
-
-            "ai_matching": ai_matching,
-
             "price": product.get("price"),
             "availability": product.get("availability"),
             "condition": product.get("condition"),
             "quantity": product.get("quantity"),
-
             "rfq_available": False
         }
 
     virtual = generate_virtual_product(part_number)
 
     return {
-
         **virtual,
-
         "images": images,
         "datasheet": datasheet,
-
         "suppliers": suppliers,
-        "market_suppliers": market_suppliers,
-
         "related_parts": related,
         "replacement_parts": replacement,
-        "accessories": accessories,
-        "compatible_modules": compatible,
-        "cross_reference": cross_reference,
-
-        "ai_matching": ai_matching,
-
         "availability": "Available on Request",
         "rfq_available": True
     }
@@ -487,6 +432,54 @@ async def upload_image(file: UploadFile = File(...)):
     return {
         "status": "uploaded",
         "filename": file.filename
+    }
+
+
+@app.post("/admin/bulk-import")
+async def bulk_import(file: UploadFile = File(...)):
+
+    db = SessionLocal()
+
+    temp_dir = tempfile.mkdtemp()
+
+    zip_path = os.path.join(temp_dir, file.filename)
+
+    with open(zip_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(temp_dir)
+
+    csv_path = os.path.join(temp_dir, "products.csv")
+
+    count = 0
+
+    if os.path.exists(csv_path):
+
+        with open(csv_path, newline="", encoding="utf-8") as f:
+
+            reader = csv.DictReader(f)
+
+            for row in reader:
+
+                part = normalize_part_number(row["part_number"])
+
+                product = Product(
+                    part_number=part,
+                    price=row.get("price"),
+                    availability=row.get("availability"),
+                    condition=row.get("condition"),
+                    quantity=row.get("quantity")
+                )
+
+                db.add(product)
+                count += 1
+
+    db.commit()
+
+    return {
+        "status": "bulk import completed",
+        "products_imported": count
     }
 
 
