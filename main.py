@@ -1,8 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import random
+import csv
+import io
+import shutil
+
 from dotenv import load_dotenv
 
 from database import engine, SessionLocal
@@ -417,56 +421,72 @@ def create_rfq(rfq: RFQRequest):
 
 
 # =========================
-# INDUSTRIAL BRANDS
+# ADMIN IMPORT SYSTEM
 # =========================
 
-BRANDS = [
-
-"Siemens","Schneider Electric","Allen Bradley","ABB","Omron",
-"Pilz","Endress+Hauser","Pepperl+Fuchs","Turck","Sick",
-"IFM","Festo","SMC","Keyence","Mitsubishi",
-"Vega","Beckhoff","Bosch Rexroth","Wago",
-"Phoenix Contact","Lenze","Yokogawa","B&R Automation"
-
-]
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-@app.get("/brands")
-def get_brands():
+@app.post("/admin/import-products")
+async def import_products(file: UploadFile = File(...)):
+
+    db = SessionLocal()
+
+    content = await file.read()
+    csv_file = io.StringIO(content.decode("utf-8"))
+    reader = csv.DictReader(csv_file)
+
+    count = 0
+
+    for row in reader:
+
+        part = normalize_part_number(row["part_number"])
+
+        existing = db.query(Product).filter(
+            Product.part_number == part
+        ).first()
+
+        if existing:
+
+            existing.price = row.get("price")
+            existing.availability = row.get("availability")
+            existing.condition = row.get("condition")
+            existing.quantity = row.get("quantity")
+
+        else:
+
+            product = Product(
+                part_number=part,
+                price=row.get("price"),
+                availability=row.get("availability"),
+                condition=row.get("condition"),
+                quantity=row.get("quantity")
+            )
+
+            db.add(product)
+
+        count += 1
+
+    db.commit()
 
     return {
-        "count": len(BRANDS),
-        "brands": BRANDS
+        "status": "success",
+        "imported": count
     }
 
 
-@app.get("/brand/{brand_name}")
-def get_brand(brand_name: str):
+@app.post("/admin/upload-image")
+async def upload_image(file: UploadFile = File(...)):
 
-    brand_name = brand_name.lower()
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
     return {
-
-        "brand": brand_name,
-
-        "description": f"{brand_name} industrial automation products supplier",
-
-        "categories":[
-            "PLC",
-            "Drives",
-            "Sensors",
-            "Power Supplies",
-            "Safety Systems",
-            "HMI",
-            "Industrial Networking"
-        ],
-
-        "top_products":[
-            f"{brand_name} PLC",
-            f"{brand_name} Drives",
-            f"{brand_name} Sensors"
-        ]
-
+        "status": "uploaded",
+        "filename": file.filename
     }
 
 
