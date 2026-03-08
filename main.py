@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
@@ -43,6 +43,24 @@ from services.global_parts_index import generate_global_parts
 
 
 # =========================
+# ENV
+# =========================
+
+load_dotenv()
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY")
+
+
+# =========================
+# ADMIN SECURITY
+# =========================
+
+def verify_admin(api_key: str = Header(None)):
+
+    if api_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
+
+# =========================
 # API MODELS
 # =========================
 
@@ -51,14 +69,6 @@ class RFQRequest(BaseModel):
     quantity: int
     company: str
     email: str
-
-
-# =========================
-# ENV
-# =========================
-
-load_dotenv()
-ADMIN_API_KEY = os.getenv("ADMIN_API_KEY")
 
 
 # =========================
@@ -104,6 +114,7 @@ def get_market_suppliers(part_number):
     results = []
 
     for s in suppliers:
+
         results.append({
             "name": s,
             "price": random.randint(800,1200),
@@ -127,73 +138,11 @@ def generate_virtual_product(part_number):
     brand = parsed.get("brand") or detect_brand(p)
     category = parsed.get("category") or detect_category(p)
 
-    family = parsed.get("family")
-    series = parsed.get("series")
-
     return {
         "part_number": p,
         "brand": brand,
         "category": category,
-        "family": family,
-        "series": series,
-        "description": f"{p} industrial automation spare part used in industrial control systems",
-    }
-
-
-# =========================
-# SMART SEARCH
-# =========================
-
-def smart_search(query, products):
-
-    query = query.lower()
-    results = []
-
-    for p in products:
-
-        part = p.part_number.lower()
-        score = 0
-
-        if part == query:
-            score = 100
-
-        elif part.startswith(query):
-            score = 70
-
-        elif query in part:
-            score = 50
-
-        if score > 0:
-
-            results.append({
-                "part_number": p.part_number,
-                "score": score
-            })
-
-    return results
-
-
-# =========================
-# DISCOVER PARTS
-# =========================
-
-@app.get("/discover/{part_number}")
-def discover_parts(part_number: str):
-
-    part_number = normalize_part_number(part_number)
-
-    variants = generate_part_variants(part_number)
-    family = generate_part_family(part_number)
-    discovered = discover_similar_parts(part_number)
-
-    parts = list(set(
-        [part_number] + variants + family + discovered
-    ))
-
-    return {
-        "seed": part_number,
-        "count": len(parts),
-        "parts": parts[:500]
+        "description": f"{p} industrial automation spare part"
     }
 
 
@@ -211,28 +160,18 @@ def search(query: str):
     try:
 
         products = db.query(Product).all()
-        results = smart_search(query, products)
 
-        variants = generate_part_variants(query)
-        family = generate_part_family(query)
-        discovered = discover_similar_parts(query)
+        results = []
 
-        global_parts = generate_global_parts()
+        for p in products:
 
-        expanded = variants + family + discovered + global_parts
+            part = p.part_number.lower()
 
-        existing = {r["part_number"] for r in results}
-
-        for part in expanded:
-
-            if part not in existing:
+            if query in part:
 
                 results.append({
-                    "part_number": part,
-                    "score": 40
+                    "part_number": p.part_number
                 })
-
-        results.sort(key=lambda x: x["score"], reverse=True)
 
         return {
             "query": query,
@@ -267,7 +206,6 @@ def get_product(part_number: str):
     )
 
     datasheet = get_datasheet(part_number)
-    suppliers = get_suppliers(part_number)
 
     results = search_local(part_number)
 
@@ -287,7 +225,6 @@ def get_product(part_number: str):
             "description": description,
             "images": images,
             "datasheet": datasheet,
-            "suppliers": suppliers,
             "related_parts": related,
             "replacement_parts": replacement,
             "price": product.get("price"),
@@ -303,7 +240,6 @@ def get_product(part_number: str):
         **virtual,
         "images": images,
         "datasheet": datasheet,
-        "suppliers": suppliers,
         "related_parts": related,
         "replacement_parts": replacement,
         "availability": "Available on Request",
@@ -325,6 +261,7 @@ def autocomplete(query: str):
     try:
 
         products = db.query(Product).all()
+
         results = []
 
         for product in products:
@@ -374,12 +311,19 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @app.post("/admin/import-products")
-async def import_products(file: UploadFile = File(...)):
+async def import_products(
+    file: UploadFile = File(...),
+    api_key: str = Header(None)
+):
+
+    verify_admin(api_key)
 
     db = SessionLocal()
 
     content = await file.read()
+
     csv_file = io.StringIO(content.decode("utf-8"))
+
     reader = csv.DictReader(csv_file)
 
     count = 0
@@ -388,25 +332,28 @@ async def import_products(file: UploadFile = File(...)):
 
         part = normalize_part_number(row["part_number"])
 
+        price = float(row.get("price") or 0)
+        quantity = int(row.get("quantity") or 0)
+
         existing = db.query(Product).filter(
             Product.part_number == part
         ).first()
 
         if existing:
 
-            existing.price = row.get("price")
+            existing.price = price
             existing.availability = row.get("availability")
             existing.condition = row.get("condition")
-            existing.quantity = row.get("quantity")
+            existing.quantity = quantity
 
         else:
 
             product = Product(
                 part_number=part,
-                price=row.get("price"),
+                price=price,
                 availability=row.get("availability"),
                 condition=row.get("condition"),
-                quantity=row.get("quantity")
+                quantity=quantity
             )
 
             db.add(product)
@@ -422,11 +369,17 @@ async def import_products(file: UploadFile = File(...)):
 
 
 @app.post("/admin/upload-image")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(
+    file: UploadFile = File(...),
+    api_key: str = Header(None)
+):
+
+    verify_admin(api_key)
 
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
 
     with open(filepath, "wb") as buffer:
+
         shutil.copyfileobj(file.file, buffer)
 
     return {
@@ -436,7 +389,12 @@ async def upload_image(file: UploadFile = File(...)):
 
 
 @app.post("/admin/bulk-import")
-async def bulk_import(file: UploadFile = File(...)):
+async def bulk_import(
+    file: UploadFile = File(...),
+    api_key: str = Header(None)
+):
+
+    verify_admin(api_key)
 
     db = SessionLocal()
 
@@ -445,9 +403,11 @@ async def bulk_import(file: UploadFile = File(...)):
     zip_path = os.path.join(temp_dir, file.filename)
 
     with open(zip_path, "wb") as buffer:
+
         shutil.copyfileobj(file.file, buffer)
 
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
+
         zip_ref.extractall(temp_dir)
 
     csv_path = os.path.join(temp_dir, "products.csv")
@@ -464,15 +424,19 @@ async def bulk_import(file: UploadFile = File(...)):
 
                 part = normalize_part_number(row["part_number"])
 
+                price = float(row.get("price") or 0)
+                quantity = int(row.get("quantity") or 0)
+
                 product = Product(
                     part_number=part,
-                    price=row.get("price"),
+                    price=price,
                     availability=row.get("availability"),
                     condition=row.get("condition"),
-                    quantity=row.get("quantity")
+                    quantity=quantity
                 )
 
                 db.add(product)
+
                 count += 1
 
     db.commit()
